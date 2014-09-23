@@ -85,20 +85,28 @@ EOS
           :icon => "http://b.hatena.ne.jp/favicon.ico",
           :role => :timeline) { |opt|
     begin
-      access_token = UserConfig[:hatena_bookmark_access_token]
-
-      access = OAuth::AccessToken.new(get_consumer_token, access_token[:token], access_token[:secret])
+      @serial_thread ||= SerialThreadGroup.new
 
       opt.messages.each { |msg|
+        access_token ||= UserConfig[:hatena_bookmark_access_token]
+        access ||= OAuth::AccessToken.new(get_consumer_token, access_token[:token], access_token[:secret])
+
         msg[:entities][:urls].each { |url|
           params = {
             :url => url[:expanded_url],
-            :comment => msg[:message],
+            :comment => "#{msg[:user][:name]} wrote:\n#{msg[:message]}",
             :tags => "from mikutter",
           }
 
           # 送信
-          response = access.request(:post, "http://api.b.hatena.ne.jp/1/my/bookmark", params, "")
+          @serial_thread.push {
+            begin
+              response = access.request(:post, "http://api.b.hatena.ne.jp/1/my/bookmark", params, "")
+            rescue => e
+              puts e
+              puts e.backtrace
+            end
+          }
         }
       }
     rescue => e
