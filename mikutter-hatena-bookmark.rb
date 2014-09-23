@@ -3,7 +3,7 @@
 require "rubygems"
 require "oauth"
 
-Plugin.create :mikutter_hatena_bookmark {
+Plugin.create(:mikutter_hatena_bookmark){
   CONSUMER_KEY = "OGO58BaGZPXV4A=="
   CONSUMER_SECRET = "tsn5V47ZhbVs6GbZ+PWN52QS8g4="
 
